@@ -17,12 +17,12 @@ from app.core.config import get_settings
 from app.core.model_downloader import ensure_models
 
 _lock = threading.Lock()
-_loaded = False
 _judgment_texts = None
 _model = None
 _case_names = None
 _embeddings = None
 _modellog = None
+_loaded = False  # Tracked for backward compatibility of is_loaded()
 
 
 def _get_models_dir() -> str:
@@ -59,61 +59,93 @@ def _get_models_dir() -> str:
 
 def load_models() -> None:
     """Load all ML pickle files. Thread-safe, idempotent."""
-    global _loaded, _judgment_texts, _model, _case_names, _embeddings, _modellog
-
-    with _lock:
-        if _loaded:
-            return
-
-        models_dir = _get_models_dir()
-        print(f"[INFO] Models directory: {models_dir}", flush=True)
-
-        # Auto-download any missing files from Hugging Face
-        ensure_models(models_dir)
-
-        print("[INFO] Loading ML models…", flush=True)
-
-        _judgment_texts = joblib.load(os.path.join(models_dir, "judgment_texts.pkl"))
-        _model          = joblib.load(os.path.join(models_dir, "model.pkl"))
-        _case_names     = joblib.load(os.path.join(models_dir, "case_names.pkl"))
-        _embeddings     = joblib.load(os.path.join(models_dir, "embeddings.pkl"))
-        _modellog       = joblib.load(os.path.join(models_dir, "modellog.pkl"))
-
-        _loaded = True
-        print("[INFO] ✓ All ML models loaded successfully", flush=True)
+    global _loaded
+    # Access all getters to force load everything eagerly if requested
+    get_judgment_texts()
+    get_model()
+    get_case_names()
+    get_embeddings()
+    get_modellog()
+    _loaded = True
 
 
 def is_loaded() -> bool:
-    return _loaded
+    """Check if all models/data files have been loaded into memory."""
+    return (
+        _judgment_texts is not None
+        and _model is not None
+        and _case_names is not None
+        and _embeddings is not None
+        and _modellog is not None
+    )
 
 
 # ── Accessors (lazy-load on first call) ──────────────────────────────────────
 
 def get_judgment_texts():
-    if not _loaded:
-        load_models()
+    global _judgment_texts
+    if _judgment_texts is None:
+        with _lock:
+            if _judgment_texts is None:
+                models_dir = _get_models_dir()
+                ensure_models(models_dir)
+                print("[INFO] Loading judgment_texts.pkl...", flush=True)
+                _judgment_texts = joblib.load(os.path.join(models_dir, "judgment_texts.pkl"))
+                print("[INFO] [OK] judgment_texts.pkl loaded successfully", flush=True)
     return _judgment_texts
 
 
 def get_model():
-    if not _loaded:
-        load_models()
+    global _model
+    if _model is None:
+        with _lock:
+            if _model is None:
+                models_dir = _get_models_dir()
+                ensure_models(models_dir)
+                print("[INFO] Loading model.pkl (SentenceTransformer)...", flush=True)
+                loaded_model = joblib.load(os.path.join(models_dir, "model.pkl"))
+                # Ensure SentenceTransformer uses CPU mode
+                if hasattr(loaded_model, "to"):
+                    loaded_model.to("cpu")
+                _model = loaded_model
+                print("[INFO] [OK] model.pkl (SentenceTransformer) loaded successfully and set to CPU mode", flush=True)
     return _model
 
 
 def get_case_names():
-    if not _loaded:
-        load_models()
+    global _case_names
+    if _case_names is None:
+        with _lock:
+            if _case_names is None:
+                models_dir = _get_models_dir()
+                ensure_models(models_dir)
+                print("[INFO] Loading case_names.pkl...", flush=True)
+                _case_names = joblib.load(os.path.join(models_dir, "case_names.pkl"))
+                print("[INFO] [OK] case_names.pkl loaded successfully", flush=True)
     return _case_names
 
 
 def get_embeddings():
-    if not _loaded:
-        load_models()
+    global _embeddings
+    if _embeddings is None:
+        with _lock:
+            if _embeddings is None:
+                models_dir = _get_models_dir()
+                ensure_models(models_dir)
+                print("[INFO] Loading embeddings.pkl...", flush=True)
+                _embeddings = joblib.load(os.path.join(models_dir, "embeddings.pkl"))
+                print("[INFO] [OK] embeddings.pkl loaded successfully", flush=True)
     return _embeddings
 
 
 def get_modellog():
-    if not _loaded:
-        load_models()
+    global _modellog
+    if _modellog is None:
+        with _lock:
+            if _modellog is None:
+                models_dir = _get_models_dir()
+                ensure_models(models_dir)
+                print("[INFO] Loading modellog.pkl...", flush=True)
+                _modellog = joblib.load(os.path.join(models_dir, "modellog.pkl"))
+                print("[INFO] [OK] modellog.pkl loaded successfully", flush=True)
     return _modellog

@@ -5,7 +5,7 @@ Semantic search + category prediction — exact port of the POST / logic from ap
 import gc
 
 import numpy as np
-from sentence_transformers import util
+
 
 from app.services.model_loader import (
     get_case_names,
@@ -60,6 +60,7 @@ def analyze_judgment(input_text: str) -> tuple[str, list[SearchResult], str | No
 
     # ── Semantic search — top 5 ────────────────────────────────────────────
     try:
+        from sentence_transformers import util
         query_embedding = model.encode(text, convert_to_tensor=True)
         cos_scores = util.cos_sim(query_embedding, embeddings)[0]
         top_results = np.argsort(-cos_scores)[:5]
