@@ -1,0 +1,97 @@
+# ─────────────────────────────────────────────
+#  LexiMind AI Platform — Production .gitignore
+# ─────────────────────────────────────────────
+
+# ── ML Model files (downloaded at runtime) ───
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+*.onnx
+*.model
+models/
+
+# ── Large data files ──────────────────────────
+*.csv
+*.xlsx
+legal_case_metadata_final.csv
+sample_legal_case.txt
+Law_case.ipynb
+
+# ── Environment / secrets ─────────────────────
+.env
+.env.local
+.env.production
+.env.staging
+.env.*.local
+!.env.example
+!.env.local.example
+
+# ── Python ────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.pyo
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ── Virtual environments ──────────────────────
+venv/
+.venv/
+env/
+ENV/
+.env/
+
+# ── Node.js / Next.js ─────────────────────────
+node_modules/
+.next/
+out/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ── VS Code ───────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# ── OS ────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ── Logs ──────────────────────────────────────
+*.log
+logs/
+*.pid
+
+# ── Temporary ────────────────────────────────
+*.tmp
+*.temp
+*.bak
+*.backup
