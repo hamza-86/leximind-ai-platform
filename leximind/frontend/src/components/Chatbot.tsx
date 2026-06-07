@@ -241,7 +241,7 @@ export default function Chatbot({ results, originalDocument }: Props) {
               fontFamily: "inherit",
             }}
           >
-            Explain like I'm not a law student
+            {"Explain like I'm not a law student"}
           </button>
         </div>
 
